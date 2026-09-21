@@ -76,7 +76,8 @@
   <p class="text-sm text-[var(--ink-soft)] border-l-2 border-[var(--rule)] pl-3 mb-8">Working notes. Timings are estimates, not a schedule — the only hard rule is arriving on Deomali in daylight.</p>
 
   <div class="tabnav" role="tablist" aria-label="Trip sections" id="tabnav">
-    <button type="button" role="tab" id="tab-btn-day1" aria-controls="tab-day1" aria-selected="true" data-tab="day1">Day 1</button>
+    <button type="button" role="tab" id="tab-btn-checkin" aria-controls="tab-checkin" aria-selected="true" data-tab="checkin">Check-in</button>
+    <button type="button" role="tab" id="tab-btn-day1" aria-controls="tab-day1" aria-selected="false" data-tab="day1" tabindex="-1">Day 1</button>
     <button type="button" role="tab" id="tab-btn-day2" aria-controls="tab-day2" aria-selected="false" data-tab="day2" tabindex="-1">Day 2</button>
     <button type="button" role="tab" id="tab-btn-map" aria-controls="tab-map" aria-selected="false" data-tab="map" tabindex="-1">Photo map</button>
     <button type="button" role="tab" id="tab-btn-budget" aria-controls="tab-budget" aria-selected="false" data-tab="budget" tabindex="-1">Budget</button>
@@ -84,6 +85,7 @@
     <button type="button" role="tab" id="tab-btn-extras" aria-controls="tab-extras" aria-selected="false" data-tab="extras" tabindex="-1">Extras</button>
   </div>
 
+  <div class="tabpanel" id="tab-checkin" role="tabpanel" aria-labelledby="tab-btn-checkin">
   <h2 class="font-display font-semibold text-xl tracking-[-0.012em] mt-12 mb-1 pb-2 border-b border-[var(--rule)]">Running early or late</h2>
   <p class="my-3">Pick the day, tap where you've got to, and it stamps the time and works out what still fits before your deadline. Day 1's deadline is the 18:00 gate and shouldn't move. Day 2's is whenever you want to be home.</p>
 
@@ -114,9 +116,10 @@
     <div id="cpout" class="mt-4 border-t border-[var(--rule)] pt-4"><p class="m-0 text-[0.93rem] text-[var(--ink-soft)]">Pick a checkpoint above.</p></div>
   </div>
 
-  <p class="my-3">Or plan it in advance from the tables below.</p>
+  <p class="my-3">Or plan it in advance from the tables below, in the Day 1 / Day 2 tabs.</p>
+  </div>
 
-  <div class="tabpanel" id="tab-day1" role="tabpanel" aria-labelledby="tab-btn-day1">
+  <div class="tabpanel" id="tab-day1" role="tabpanel" aria-labelledby="tab-btn-day1" hidden>
   <div class="overflow-x-auto -mx-5 px-5 mt-7">
     <svg viewBox="0 0 800 250" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Elevation profile rising from sea level at Vizag to 1,672 metres at Deomali" class="block min-w-[620px] w-full h-auto">
       <line class="pf-base" x1="20" y1="200" x2="780" y2="200"/>
@@ -982,7 +985,7 @@
     b.addEventListener('click',function(){ show(b.dataset.tab); });
   });
 
-  var start='day1';
+  var start='checkin';
   try{
     var saved=localStorage.getItem('deomali-tab');
     if(saved && panels[saved]) start=saved;
