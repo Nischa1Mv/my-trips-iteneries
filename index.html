@@ -38,25 +38,31 @@
     font-size:16.5px;
     line-height:1.62;
   }
-  .wrap{max-width:64rem;margin:0 auto;padding:1.4rem 1.25rem 5rem}
+  .wrap{max-width:64rem;margin:0 auto;padding:0 1.25rem 5rem}
 
-  /* hero */
-  .hero{
-    position:relative;overflow:hidden;border-radius:1.4rem;
-    min-height:min(640px,88vh);
-    display:flex;flex-direction:column;justify-content:space-between;
-    padding:1.4rem 1.4rem 1.8rem;
-    color:#F4EFE6;
-    transition:background 1.1s ease;
-  }
+  /* hero carousel */
+  .hero{position:relative;overflow:hidden;width:100%;height:100svh;color:#F4EFE6}
+
+  .hero-track{display:flex;height:100%;transition:transform .6s cubic-bezier(.65,0,.35,1)}
+  .hero-slide{position:relative;height:100%;flex:none}
+  .hero-slide-bg{position:absolute;inset:0}
   .hero-overlay{
     position:absolute;inset:0;
     background:linear-gradient(180deg,rgba(6,12,14,.55) 0%,rgba(6,12,14,.15) 32%,rgba(6,12,14,.15) 55%,rgba(6,12,14,.75) 100%);
-    pointer-events:none;
   }
-  .hero>*{position:relative;z-index:1}
+  .hero-slide-body{
+    position:relative;height:100%;z-index:1;
+    display:flex;flex-direction:column;justify-content:flex-end;
+    padding:5.2rem 1.4rem 1.8rem;
+    padding-bottom:calc(1.8rem + env(safe-area-inset-bottom,0px));
+  }
 
-  .hero-nav{display:flex;align-items:center;justify-content:space-between;gap:1rem}
+  .hero-nav{
+    position:absolute;top:0;left:0;right:0;z-index:3;
+    display:flex;align-items:center;justify-content:space-between;gap:1rem;
+    padding:1.4rem 1.4rem 0;
+    padding-top:calc(1.4rem + env(safe-area-inset-top,0px));
+  }
   .brand{font-family:Archivo,sans-serif;font-weight:700;font-size:1.05rem;letter-spacing:-.01em;color:#F4EFE6;text-decoration:none}
   .hero-dots{display:flex;gap:.4rem}
   .hero-dots button{
@@ -86,7 +92,7 @@
   .hero-fact{display:flex;justify-content:space-between;gap:1rem;font-size:.88rem;border-bottom:1px solid rgba(244,239,230,.14);padding-bottom:.5rem}
   .hero-fact:last-child{border-bottom:0;padding-bottom:0}
   .hero-fact .k{color:rgba(244,239,230,.6)}
-  .hero-fact .v{color:#F4EFE6;font-weight:600;tabular-nums:1}
+  .hero-fact .v{color:#F4EFE6;font-weight:600;font-variant-numeric:tabular-nums}
   .hero-cta{
     display:block;text-align:center;text-decoration:none;
     background:#F4EFE6;color:#12181A;font-weight:600;font-size:.95rem;
@@ -95,7 +101,7 @@
   .hero-cta:hover{background:#fff}
 
   .hero-arrow{
-    position:absolute;top:50%;transform:translateY(-50%);z-index:2;
+    position:absolute;top:50%;transform:translateY(-50%);z-index:3;
     width:2.6rem;height:2.6rem;border-radius:999px;border:1px solid rgba(244,239,230,.3);
     background:rgba(10,18,20,.4);backdrop-filter:blur(8px);color:#F4EFE6;
     font-size:1.1rem;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;
@@ -106,114 +112,151 @@
   .hero-arrow[hidden]{display:none}
 
   @media (max-width:36rem){
-    .hero{min-height:auto;padding:1.1rem 1.1rem 1.4rem}
+    .hero-slide-body{padding:4.6rem 1.1rem 1.4rem}
     .hero-body{flex-direction:column;align-items:stretch}
     .hero-card{min-width:0}
   }
 
   h1.page-title{font-family:Archivo,"Public Sans",Helvetica,Arial,sans-serif;font-weight:700;font-size:1.5rem;margin:2.2rem 0 .3rem}
-  .lede{color:var(--ink-soft);font-size:1rem;margin:0 0 0;max-width:34rem}
+  .lede{color:var(--ink-soft);font-size:1rem;margin:0;max-width:34rem}
 </style>
 </head>
 <body>
-<div class="wrap">
-
   <div class="hero" id="hero">
-    <div class="hero-overlay"></div>
-
-    <button type="button" class="hero-arrow prev" id="heroPrev" aria-label="Previous trip">‹</button>
-    <button type="button" class="hero-arrow next" id="heroNext" aria-label="Next trip">›</button>
-
     <nav class="hero-nav">
       <span class="brand">Trip notes</span>
       <div class="hero-dots" id="heroDots"></div>
     </nav>
 
-    <div class="hero-body">
-      <div class="hero-text">
-        <h1 class="hero-headline" id="heroHeadline"></h1>
-        <p class="hero-blurb" id="heroBlurb"></p>
-      </div>
-      <div class="hero-card">
-        <h2 id="heroCardName"></h2>
-        <div class="hero-facts" id="heroFacts"></div>
-        <a class="hero-cta" id="heroCta" href="#">View trip</a>
-      </div>
-    </div>
+    <button type="button" class="hero-arrow prev" id="heroPrev" aria-label="Previous trip">‹</button>
+    <button type="button" class="hero-arrow next" id="heroNext" aria-label="Next trip">›</button>
+
+    <div class="hero-track" id="heroTrack"></div>
   </div>
 
-  <h1 class="page-title">All itineraries</h1>
-  <p class="lede">Every trip written up so far. Swipe the hero above or pick one below.</p>
-
-</div>
+  <div class="wrap">
+    <h1 class="page-title">All itineraries</h1>
+    <p class="lede">Every trip written up so far. Swipe the hero above or use the dots.</p>
+  </div>
 
 <script>
 (function(){
   var heroEl=document.getElementById('hero'),
+      trackEl=document.getElementById('heroTrack'),
       prevBtn=document.getElementById('heroPrev'),
       nextBtn=document.getElementById('heroNext'),
-      dotsEl=document.getElementById('heroDots'),
-      headlineEl=document.getElementById('heroHeadline'),
-      blurbEl=document.getElementById('heroBlurb'),
-      cardNameEl=document.getElementById('heroCardName'),
-      factsEl=document.getElementById('heroFacts'),
-      ctaEl=document.getElementById('heroCta');
+      dotsEl=document.getElementById('heroDots');
 
   var trips=[], i=0;
 
-  function render(){
-    var t=trips[i];
-    if(!t) return;
-    heroEl.style.background=t.gradient||'linear-gradient(160deg,#0B161A,#16303A)';
-    headlineEl.innerHTML='';
+  function buildSlide(t){
+    var slide=document.createElement('div');
+    slide.className='hero-slide';
+
+    var bg=document.createElement('div');
+    bg.className='hero-slide-bg';
+    bg.style.background=t.gradient||'linear-gradient(160deg,#0B161A,#16303A)';
+    slide.appendChild(bg);
+
+    var overlay=document.createElement('div');
+    overlay.className='hero-overlay';
+    slide.appendChild(overlay);
+
+    var body=document.createElement('div');
+    body.className='hero-slide-body';
+
+    var inner=document.createElement('div');
+    inner.className='hero-body';
+
+    var textWrap=document.createElement('div');
+    textWrap.className='hero-text';
+    var h1=document.createElement('h1');
+    h1.className='hero-headline';
     (t.headline||[]).forEach(function(line,idx){
       var span=document.createElement('span');
       if(idx===((t.headline||[]).length-1)) span.className='soft';
       span.textContent=line;
-      headlineEl.appendChild(span);
+      h1.appendChild(span);
     });
-    blurbEl.textContent=t.blurb||'';
-    cardNameEl.textContent=(t.card&&t.card.name)||t.headline&&t.headline.join(' ')||'';
-    factsEl.innerHTML='';
+    var blurb=document.createElement('p');
+    blurb.className='hero-blurb';
+    blurb.textContent=t.blurb||'';
+    textWrap.appendChild(h1); textWrap.appendChild(blurb);
+
+    var card=document.createElement('div');
+    card.className='hero-card';
+    var h2=document.createElement('h2');
+    h2.textContent=(t.card&&t.card.name)||(t.headline||[]).join(' ');
+    var facts=document.createElement('div');
+    facts.className='hero-facts';
     ((t.card&&t.card.facts)||[]).forEach(function(f){
       var row=document.createElement('div'); row.className='hero-fact';
       var k=document.createElement('span'); k.className='k'; k.textContent=f[0];
       var v=document.createElement('span'); v.className='v'; v.textContent=f[1];
       row.appendChild(k); row.appendChild(v);
-      factsEl.appendChild(row);
+      facts.appendChild(row);
     });
-    ctaEl.textContent=(t.card&&t.card.cta)||'View trip';
-    ctaEl.href=t.href||'#';
+    var cta=document.createElement('a');
+    cta.className='hero-cta';
+    cta.textContent=(t.card&&t.card.cta)||'View trip';
+    cta.href=t.href||'#';
+    card.appendChild(h2); card.appendChild(facts); card.appendChild(cta);
 
-    Array.prototype.forEach.call(dotsEl.children,function(d,idx){
-      d.setAttribute('aria-current', idx===i?'true':'false');
-    });
-
-    var multi=trips.length>1;
-    prevBtn.hidden=!multi; nextBtn.hidden=!multi;
+    inner.appendChild(textWrap); inner.appendChild(card);
+    body.appendChild(inner);
+    slide.appendChild(body);
+    return slide;
   }
 
-  function go(delta){
-    i=(i+delta+trips.length)%trips.length;
-    render();
+  function layout(){
+    var n=Math.max(trips.length,1);
+    trackEl.style.width=(n*100)+'%';
+    Array.prototype.forEach.call(trackEl.children,function(s){ s.style.width=(100/n)+'%'; });
   }
 
-  prevBtn.addEventListener('click',function(){ go(-1); });
-  nextBtn.addEventListener('click',function(){ go(1); });
+  function goTo(idx){
+    var n=trips.length;
+    if(!n) return;
+    i=((idx%n)+n)%n;
+    var slideWidth=100/n;
+    trackEl.style.transform='translateX(-'+(i*slideWidth)+'%)';
+    Array.prototype.forEach.call(dotsEl.children,function(d,idx2){
+      d.setAttribute('aria-current', idx2===i?'true':'false');
+    });
+  }
+
+  prevBtn.addEventListener('click',function(){ goTo(i-1); });
+  nextBtn.addEventListener('click',function(){ goTo(i+1); });
+
+  var startX=null;
+  heroEl.addEventListener('touchstart',function(e){ startX=e.touches[0].clientX; },{passive:true});
+  heroEl.addEventListener('touchend',function(e){
+    if(startX===null) return;
+    var dx=e.changedTouches[0].clientX-startX;
+    if(Math.abs(dx)>40) goTo(i+(dx<0?1:-1));
+    startX=null;
+  },{passive:true});
 
   fetch('data/trips.json').then(function(r){return r.json();}).then(function(data){
     trips=data.trips||[];
+    trackEl.innerHTML='';
     dotsEl.innerHTML='';
-    trips.forEach(function(_,idx){
+    trips.forEach(function(t,idx){
+      trackEl.appendChild(buildSlide(t));
       var b=document.createElement('button');
       b.type='button'; b.setAttribute('aria-label','Trip '+(idx+1));
-      b.addEventListener('click',function(){ i=idx; render(); });
+      b.addEventListener('click',function(){ goTo(idx); });
       dotsEl.appendChild(b);
     });
-    render();
+    layout();
+    goTo(0);
+    var multi=trips.length>1;
+    prevBtn.hidden=!multi; nextBtn.hidden=!multi;
   }).catch(function(){
-    heroEl.style.background='linear-gradient(160deg,#0B161A,#16303A)';
-    headlineEl.textContent='No trips yet';
+    trackEl.innerHTML='';
+    var slide=buildSlide({headline:['No trips yet']});
+    trackEl.appendChild(slide);
+    layout();
   });
 })();
 </script>
