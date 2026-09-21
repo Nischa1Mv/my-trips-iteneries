@@ -19,14 +19,14 @@ Site: trip itinerary notes, static, GitHub Pages, repo Nischa1Mv/my-trips-itener
 - **Map library: Leaflet + OpenStreetMap.** Free, no API key, no build step, fits static site. Built for Deomali: `data/deomali-places.json` holds `{id, name, lat, lng, photos: []}` per stop; `deomali.html` loads Leaflet from cdnjs, fetches that file, drops a pin per place, popup lists photos (or "No photos yet"). Coordinates are approximate — flagged in the data file, not verified against GPS.
 - **Generalize via trip-as-data**, incrementally: each trip's places/photos live in their own `data/<trip>-places.json`, same shape, so the map/photo pattern is copy-paste-new-file, not rewritten per trip. NOT done yet: pulling the rest of the page (route, stops, elevations, timings, budget defaults) out of hand-written HTML into data — that stays hand-written for now, since Deomali's calculators/timeline already work and a full data-driven rewrite risks breaking them for a cosmetic-only gain. Revisit when a second trip page is actually added and the copy-paste pain is real.
 
-## Far future — community (needs a backend, not started)
-- Other people share their own trip itineraries — user accounts, not just this repo's owner
-- Uploaded photos/files with a public/private toggle per item — needs auth + access control, not a static file host
-- Reddit-style comment threads on trips — needs a database and moderation, not a GitHub Pages concept
-- Implication: this tier can't be a static GitHub Pages site alone. Needs a backend (auth, storage with access control, DB for comments) — e.g. Supabase/Firebase, or a custom API — bolted onto or replacing the static frontend. Static site can stay as the "public trip notes" layer; community features would be a separate service. Not designed, not started.
+## Far future — private notes, public page (single user — you, not a community)
+Corrected: this is for one user, not multiple people sharing. That removes the need for accounts/auth entirely.
+- **Public/private photos**: `"public": true/false` per photo in the trip JSON. On a static site "private" can only mean "not committed to the repo" — there's no server to gate access, so private photos just live outside the repo and never ship. No backend needed.
+- **Comments**: a `notes`/`comment` field per place or photo in the same JSON, rendered on the page as your own annotation — you edit the file, it's not a live form + database. Not threaded, not multi-user — "talk about them" here means your own running commentary, not a Reddit thread.
+- No Supabase/Firebase/custom API needed for this. That tier only becomes necessary if this ever turns into an actual multi-user product (other people posting their own trips) — not the current plan.
+- See published roadmap artifact for the visual version of these four tiers (live now → more trips → whole page from data → this one).
 
 ## Still open
 - Where actual photo files live (repo `/assets/<trip>/`? external host?) and how they get into the `photos` array
 - Full page-from-data generation (route/stops/timings/elevations) — deferred, see above
 - Static multi-page HTML (current) vs. a generator/framework (Next, Astro, 11ty) vs. React+Vite (only forced if MagicUI or a heavier map/gallery component gets pulled in)
-- "Usable by other people" — template repo vs. CLI/scaffold vs. just a clean data format to copy — deferred until there's a real second user
