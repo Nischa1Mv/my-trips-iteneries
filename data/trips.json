@@ -1,0 +1,20 @@
+{
+  "trips": [
+    {
+      "slug": "deomali",
+      "href": "deomali.html",
+      "gradient": "linear-gradient(160deg, #0B161A 0%, #16303A 45%, #2A4A4D 100%)",
+      "headline": ["Vizag to", "Deomali"],
+      "blurb": "Two-day motorcycle run to Odisha's highest peak, up through Araku and Balda, night on the summit, home on NH26.",
+      "card": {
+        "name": "Deomali Summit Run",
+        "facts": [
+          ["Duration", "2 days"],
+          ["Distance", "431 km"],
+          ["Highest point", "1,672 m"]
+        ],
+        "cta": "View trip"
+      }
+    }
+  ]
+}
