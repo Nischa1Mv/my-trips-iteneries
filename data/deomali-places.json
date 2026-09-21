@@ -1,0 +1,15 @@
+{
+  "trip": "Vizag to Deomali",
+  "note": "Coordinates are approximate village/town centres, not exact stop points. Verify before relying on them for navigation.",
+  "places": [
+    { "id": "vizag", "name": "Vizag", "lat": 17.6868, "lng": 83.2185, "photos": [] },
+    { "id": "araku", "name": "Araku", "lat": 18.3333, "lng": 82.8667, "photos": [] },
+    { "id": "balda", "name": "Balda", "lat": 18.5980, "lng": 82.7550, "photos": [] },
+    { "id": "semiliguda", "name": "Semiliguda", "lat": 18.7167, "lng": 82.9833, "photos": [] },
+    { "id": "pottangi", "name": "Pottangi", "lat": 18.5860, "lng": 83.1750, "photos": [] },
+    { "id": "deomali", "name": "Deomali", "lat": 18.6060, "lng": 83.1930, "photos": [] },
+    { "id": "sunki", "name": "Sunki", "lat": 18.3520, "lng": 83.1520, "photos": [] },
+    { "id": "salur", "name": "Salur", "lat": 18.5167, "lng": 83.2167, "photos": [] },
+    { "id": "vizianagaram", "name": "Vizianagaram", "lat": 18.1067, "lng": 83.4131, "photos": [] }
+  ]
+}

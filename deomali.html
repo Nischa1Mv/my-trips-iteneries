@@ -7,6 +7,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=Public+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script src="https://cdn.tailwindcss.com"></script>
 <style>
   :root{
@@ -571,6 +573,10 @@
     <li class="my-1.5">Medkit packed, and everyone's own medicines in it</li>
   </ul>
 
+  <h2 class="font-display font-semibold text-xl tracking-[-0.012em] mt-12 mb-1 pb-2 border-b border-[var(--rule)]">Photos by place</h2>
+  <p class="my-3">Click a pin to see photos from that stop. Empty until photos are added — route data lives in <code class="text-sm">data/deomali-places.json</code>.</p>
+  <div id="tripmap" class="h-[420px] rounded border border-[var(--rule)] mt-4"></div>
+
   <h2 class="font-display font-semibold text-xl tracking-[-0.012em] mt-12 mb-1 pb-2 border-b border-[var(--rule)]">Your notes</h2>
   <div class="border border-dashed border-[var(--rule)] rounded p-4 text-[var(--ink-soft)] text-[0.95rem] mt-4">
     <p class="my-1.5">Riders and bikes —</p>
@@ -911,6 +917,32 @@
   if(state.time) timeEl.value=state.time;
   buildCps();
   render();
+})();
+</script>
+
+<script>
+(function(){
+  var mapEl=document.getElementById('tripmap');
+  if(!mapEl||!window.L) return;
+  var map=L.map(mapEl).setView([18.3,83.0],9);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
+    attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+    maxZoom:18
+  }).addTo(map);
+
+  fetch('data/deomali-places.json').then(function(r){return r.json();}).then(function(data){
+    var pts=[];
+    (data.places||[]).forEach(function(p){
+      var photos=p.photos||[];
+      var body=photos.length
+        ? photos.map(function(src){return '<img src="'+src+'" alt="'+p.name+'" style="width:100%;border-radius:3px;margin-top:.3rem">';}).join('')
+        : '<span style="color:var(--ink-soft);font-size:.85rem">No photos yet</span>';
+      L.marker([p.lat,p.lng]).addTo(map)
+        .bindPopup('<strong>'+p.name+'</strong><br>'+body);
+      pts.push([p.lat,p.lng]);
+    });
+    if(pts.length) map.fitBounds(pts,{padding:[24,24]});
+  }).catch(function(){/* data file missing or unreadable, map still shows */});
 })();
 </script>
 </body>
