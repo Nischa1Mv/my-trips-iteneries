@@ -54,6 +54,18 @@
   .leg{position:relative}
   .leg>li{position:relative}
   .leg>li::before{content:"";position:absolute;left:-4.5px;top:.55rem;width:7px;height:7px;border-radius:50%;background:var(--forest)}
+
+  .tabnav{display:flex;flex-wrap:wrap;gap:.4rem;margin-top:1.6rem;border-bottom:1.5px solid var(--rule);padding-bottom:.7rem}
+  .tabnav button{
+    font:600 .88rem/1.2 "Public Sans",sans-serif;color:var(--ink-soft);
+    background:none;border:1.5px solid var(--rule);border-radius:999px;
+    padding:.5rem .95rem;cursor:pointer;
+  }
+  .tabnav button:hover{border-color:var(--forest);color:var(--forest)}
+  .tabnav button[aria-selected="true"]{background:var(--forest);border-color:var(--forest);color:var(--paper)}
+  .tabnav button:focus-visible{outline:2.5px solid var(--forest);outline-offset:2px}
+  .tabpanel{padding-top:.4rem}
+  .tabpanel[hidden]{display:none}
 </style>
 </head>
 <body class="font-body m-0 bg-[var(--paper)] text-[var(--ink)] text-[16.5px] leading-[1.62]">
@@ -63,6 +75,48 @@
   <p class="text-[var(--ink-soft)] text-[1.02rem] mb-6 max-w-[34rem]">Two-day motorcycle run to Odisha's highest peak, up through Araku and Balda, night on the summit, home on NH26.</p>
   <p class="text-sm text-[var(--ink-soft)] border-l-2 border-[var(--rule)] pl-3 mb-8">Working notes. Timings are estimates, not a schedule — the only hard rule is arriving on Deomali in daylight.</p>
 
+  <h2 class="font-display font-semibold text-xl tracking-[-0.012em] mt-12 mb-1 pb-2 border-b border-[var(--rule)]">Running early or late</h2>
+  <p class="my-3">Pick the day, tap where you've got to, and it stamps the time and works out what still fits before your deadline. Day 1's deadline is the 18:00 gate and shouldn't move. Day 2's is whenever you want to be home.</p>
+
+  <div class="bg-[var(--panel)] border border-[var(--rule)] rounded my-6 p-4">
+    <div class="flex gap-2 mb-4" id="modes">
+      <button type="button" data-mode="up" aria-pressed="true" class="flex-1 text-[0.88rem] font-semibold text-[var(--ink-soft)] bg-transparent border border-[var(--rule)] rounded py-2 px-2 cursor-pointer aria-pressed:text-[var(--paper)] aria-pressed:bg-[var(--forest)] aria-pressed:border-[var(--forest)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--forest)] focus-visible:outline-offset-2">Day 1 — going up</button>
+      <button type="button" data-mode="home" aria-pressed="false" class="flex-1 text-[0.88rem] font-semibold text-[var(--ink-soft)] bg-transparent border border-[var(--rule)] rounded py-2 px-2 cursor-pointer aria-pressed:text-[var(--paper)] aria-pressed:bg-[var(--forest)] aria-pressed:border-[var(--forest)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--forest)] focus-visible:outline-offset-2">Day 2 — heading home</button>
+    </div>
+    <div class="flex flex-wrap gap-2" id="cps"></div>
+    <div class="flex flex-wrap items-center gap-2 mt-4">
+      <label for="cptime" class="text-[0.85rem] font-semibold text-[var(--ink-soft)]">Arrived at</label>
+      <input id="cptime" type="time" value="12:30" class="font-semibold text-base tabular-nums text-[var(--ink)] bg-[var(--paper)] border border-[var(--rule)] rounded px-2 py-1.5">
+      <button type="button" id="cpnow" class="text-[0.84rem] font-medium text-[var(--ink-soft)] bg-transparent border border-[var(--rule)] rounded px-3 py-2 cursor-pointer hover:text-[var(--forest)] hover:border-[var(--forest)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--forest)] focus-visible:outline-offset-2">Now</button>
+      <label for="cpdeadline" class="text-[0.85rem] font-semibold text-[var(--ink-soft)]">Deadline</label>
+      <input id="cpdeadline" type="time" value="18:00" class="font-semibold text-base tabular-nums text-[var(--ink)] bg-[var(--paper)] border border-[var(--rule)] rounded px-2 py-1.5">
+    </div>
+    <div class="flex flex-wrap items-center gap-2 mt-4">
+      <label for="cppace" class="text-[0.85rem] font-semibold text-[var(--ink-soft)]">Pace</label>
+      <select id="cppace" class="font-semibold text-[0.95rem] text-[var(--ink)] bg-[var(--paper)] border border-[var(--rule)] rounded px-2 py-1.5">
+        <option value="0.85">Quick</option>
+        <option value="1" selected>Normal</option>
+        <option value="1.2">Slow</option>
+      </select>
+      <span class="text-[0.82rem] text-[var(--ink-soft)]" id="pacehint">Set to how the morning actually went.</span>
+      <button type="button" id="cpreset" class="ml-auto text-[0.84rem] font-medium text-[var(--ink-soft)] bg-transparent border border-[var(--rule)] rounded px-3 py-2 cursor-pointer hover:text-[var(--forest)] hover:border-[var(--forest)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--forest)] focus-visible:outline-offset-2">Start over</button>
+    </div>
+    <div id="cpstops" class="mt-4 flex flex-col gap-0.5"></div>
+    <div id="cpout" class="mt-4 border-t border-[var(--rule)] pt-4"><p class="m-0 text-[0.93rem] text-[var(--ink-soft)]">Pick a checkpoint above.</p></div>
+  </div>
+
+  <p class="my-3">Or plan it in advance from the tables below.</p>
+
+
+  <div class="tabnav" role="tablist" aria-label="Trip sections" id="tabnav">
+    <button type="button" role="tab" id="tab-btn-day1" aria-controls="tab-day1" aria-selected="true" data-tab="day1">Day 1</button>
+    <button type="button" role="tab" id="tab-btn-day2" aria-controls="tab-day2" aria-selected="false" data-tab="day2" tabindex="-1">Day 2</button>
+    <button type="button" role="tab" id="tab-btn-map" aria-controls="tab-map" aria-selected="false" data-tab="map" tabindex="-1">Photo map</button>
+    <button type="button" role="tab" id="tab-btn-budget" aria-controls="tab-budget" aria-selected="false" data-tab="budget" tabindex="-1">Budget</button>
+    <button type="button" role="tab" id="tab-btn-carry" aria-controls="tab-carry" aria-selected="false" data-tab="carry" tabindex="-1">Things to carry</button>
+    <button type="button" role="tab" id="tab-btn-extras" aria-controls="tab-extras" aria-selected="false" data-tab="extras" tabindex="-1">Extras</button>
+  </div>
+  <div class="tabpanel" id="tab-day1" role="tabpanel" aria-labelledby="tab-btn-day1">
   <div class="overflow-x-auto -mx-5 px-5 mt-7">
     <svg viewBox="0 0 800 250" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Elevation profile rising from sea level at Vizag to 1,672 metres at Deomali" class="block min-w-[620px] w-full h-auto">
       <line class="pf-base" x1="20" y1="200" x2="780" y2="200"/>
@@ -116,6 +170,51 @@
       <p class="mt-1 text-[0.95rem] text-[var(--ink-soft)]">15–30 min on a paved path. Optional. Sunset and stars back at camp after.</p></li>
   </ul>
 
+  <h3 class="font-display font-semibold text-base mt-8 mb-1">Day 1, going up</h3>
+  <div class="overflow-x-auto">
+  <table class="border-collapse w-full min-w-[30rem] my-4 text-[0.93rem]">
+    <thead><tr>
+      <th class="text-left font-display font-semibold text-[0.85rem] text-[var(--ink-soft)] pr-3 pb-2 border-b border-[var(--rule)]">Stop</th>
+      <th class="text-left font-display font-semibold text-[0.85rem] text-[var(--ink-soft)] pr-3 pb-2 border-b border-[var(--rule)]">Decide at</th>
+      <th class="text-left font-display font-semibold text-[0.85rem] text-[var(--ink-soft)] pr-3 pb-2 border-b border-[var(--rule)]">Costs</th>
+      <th class="text-left font-display font-semibold text-[0.85rem] text-[var(--ink-soft)] pr-3 pb-2 border-b border-[var(--rule)]">Summit at</th>
+    </tr></thead>
+    <tbody>
+      <tr><td class="font-semibold border-b border-[var(--rule)] py-2 pr-3">Galikonda viewpoint</td><td class="border-b border-[var(--rule)] py-2 pr-3">On the Anantagiri ghat, ~6:45</td><td class="border-b border-[var(--rule)] py-2 pr-3 tabular-nums whitespace-nowrap">10 min</td><td class="border-b border-[var(--rule)] py-2 pr-3 tabular-nums whitespace-nowrap">14:40</td></tr>
+      <tr><td class="font-semibold border-b border-[var(--rule)] py-2 pr-3">Maliguda tunnel</td><td class="border-b border-[var(--rule)] py-2 pr-3">Semiliguda</td><td class="border-b border-[var(--rule)] py-2 pr-3 tabular-nums whitespace-nowrap">20 min</td><td class="border-b border-[var(--rule)] py-2 pr-3 tabular-nums whitespace-nowrap">14:50</td></tr>
+      <tr><td class="font-semibold border-b border-[var(--rule)] py-2 pr-3">Galigabadar falls</td><td class="border-b border-[var(--rule)] py-2 pr-3">Pottangi</td><td class="border-b border-[var(--rule)] py-2 pr-3 tabular-nums whitespace-nowrap">90 min</td><td class="border-b border-[var(--rule)] py-2 pr-3 tabular-nums whitespace-nowrap">16:00</td></tr>
+      <tr><td class="font-semibold border-b border-[var(--rule)] py-2 pr-3">Both of the above</td><td class="border-b border-[var(--rule)] py-2 pr-3">Semiliguda</td><td class="border-b border-[var(--rule)] py-2 pr-3 tabular-nums whitespace-nowrap">110 min</td><td class="border-b border-[var(--rule)] py-2 pr-3 tabular-nums whitespace-nowrap">16:20</td></tr>
+      <tr class="text-[var(--ink-soft)]"><td class="font-semibold border-b border-[var(--rule)] py-2 pr-3 line-through decoration-[var(--rule)]">Rani Duduma</td><td class="border-b border-[var(--rule)] py-2 pr-3 line-through decoration-[var(--rule)]">Semiliguda</td><td class="border-b border-[var(--rule)] py-2 pr-3 tabular-nums whitespace-nowrap line-through decoration-[var(--rule)]">3 hrs</td><td class="border-b border-[var(--rule)] py-2 pr-3 tabular-nums whitespace-nowrap text-[var(--laterite)]">17:30 — too late</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p class="text-sm text-[var(--ink-soft)] mt-2">Day 1 walking is Balda's last 2 km up and back for the pillions, plus the watchtower path. Riders who take the bikes up Balda walk closer to 2 km than 7. Galikonda is free and you ride past it. Borra doesn't work going up — you'll pass around 7:00 and it opens later.</p>
+
+  <div class="border-l-[3px] border-[var(--laterite)] bg-[var(--shade)] p-3.5 my-6 rounded-r">
+    <p class="m-0 text-[0.95rem]"><strong class="text-[var(--laterite)]">One cut-off governs all of these.</strong> Be turning onto the Doodhari road by 15:30. The climb takes about 75 minutes and you want to be parked well before the light goes. Past 15:30, skip whatever you were considering and ride up.</p>
+  </div>
+
+  <h2 class="font-display font-semibold text-xl tracking-[-0.012em] mt-12 mb-1 pb-2 border-b border-[var(--rule)]">Non-negotiables</h2>
+  <div class="border-l-[3px] border-[var(--laterite)] bg-[var(--shade)] p-3.5 my-6 rounded-r">
+    <p class="m-0 text-[0.95rem]"><strong class="text-[var(--laterite)]">Through the Deomali gate before 18:00.</strong> The district administration bars night entry. Late means turned away, and your booking doesn't help you.</p>
+    <p class="mt-1 text-[0.95rem]"><strong class="text-[var(--laterite)]">Off the ghats before dark.</strong> Free-roaming cattle, no lighting, blind hairpins, trucks. Locals don't ride these roads at night.</p>
+    <p class="mt-1 text-[0.95rem]"><strong class="text-[var(--laterite)]">Don't swim in Balda Pond.</strong> It looks shallow and isn't. People have drowned there.</p>
+    <p class="mt-1 text-[0.95rem]"><strong class="text-[var(--laterite)]">Bail-out rule.</strong> Not at Balda by 11:00? Skip it and ride for Deomali. The booked night matters more.</p>
+  </div>
+
+  <h2 class="font-display font-semibold text-xl tracking-[-0.012em] mt-12 mb-1 pb-2 border-b border-[var(--rule)]">Balda</h2>
+  <p class="my-3">Balda village, via Padwa, Nandapur block, Koraput. Flat tabletop summit with a pond, views over Jalaput reservoir, and trains crossing the valley below. The cave itself is small — the plateau is the reason to go.</p>
+  <div class="overflow-x-auto">
+  <table class="border-collapse w-full my-4 text-[0.95rem]">
+    <tr><td class="border-b border-[var(--rule)] py-2.5 pr-4 align-top font-semibold w-44">Cave hours</td><td class="border-b border-[var(--rule)] py-2.5 pr-2 align-top">8:00–18:00 weekdays, 9:00–17:00 weekends</td></tr>
+    <tr><td class="border-b border-[var(--rule)] py-2.5 pr-4 align-top font-semibold w-44">Phone</td><td class="border-b border-[var(--rule)] py-2.5 pr-2 align-top">+91 88953 78142</td></tr>
+    <tr><td class="border-b border-[var(--rule)] py-2.5 pr-4 align-top font-semibold w-44">Last 2 km</td><td class="border-b border-[var(--rule)] py-2.5 pr-2 align-top">No proper road. Steep, off-road. Single rider can make it up; two-up with luggage, park lower and walk.</td></tr>
+  </table>
+  </div>
+
+  </div>
+
+  <div class="tabpanel" id="tab-day2" role="tabpanel" aria-labelledby="tab-btn-day2" hidden>
   <div class="overflow-x-auto -mx-5 px-5 mt-7">
     <svg viewBox="0 0 800 250" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Elevation profile descending from 1,672 metres at Deomali to sea level at Vizag" class="block min-w-[620px] w-full h-auto">
       <line class="pf-base" x1="20" y1="200" x2="780" y2="200"/>
@@ -165,62 +264,6 @@
       <p class="mt-1 text-[0.95rem] text-[var(--ink-soft)]">158 km, about 4h 15m of riding. Home well before dark even with a long stop.</p></li>
   </ul>
 
-  <h2 class="font-display font-semibold text-xl tracking-[-0.012em] mt-12 mb-1 pb-2 border-b border-[var(--rule)]">Running early or late</h2>
-  <p class="my-3">Pick the day, tap where you've got to, and it stamps the time and works out what still fits before your deadline. Day 1's deadline is the 18:00 gate and shouldn't move. Day 2's is whenever you want to be home.</p>
-
-  <div class="bg-[var(--panel)] border border-[var(--rule)] rounded my-6 p-4">
-    <div class="flex gap-2 mb-4" id="modes">
-      <button type="button" data-mode="up" aria-pressed="true" class="flex-1 text-[0.88rem] font-semibold text-[var(--ink-soft)] bg-transparent border border-[var(--rule)] rounded py-2 px-2 cursor-pointer aria-pressed:text-[var(--paper)] aria-pressed:bg-[var(--forest)] aria-pressed:border-[var(--forest)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--forest)] focus-visible:outline-offset-2">Day 1 — going up</button>
-      <button type="button" data-mode="home" aria-pressed="false" class="flex-1 text-[0.88rem] font-semibold text-[var(--ink-soft)] bg-transparent border border-[var(--rule)] rounded py-2 px-2 cursor-pointer aria-pressed:text-[var(--paper)] aria-pressed:bg-[var(--forest)] aria-pressed:border-[var(--forest)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--forest)] focus-visible:outline-offset-2">Day 2 — heading home</button>
-    </div>
-    <div class="flex flex-wrap gap-2" id="cps"></div>
-    <div class="flex flex-wrap items-center gap-2 mt-4">
-      <label for="cptime" class="text-[0.85rem] font-semibold text-[var(--ink-soft)]">Arrived at</label>
-      <input id="cptime" type="time" value="12:30" class="font-semibold text-base tabular-nums text-[var(--ink)] bg-[var(--paper)] border border-[var(--rule)] rounded px-2 py-1.5">
-      <button type="button" id="cpnow" class="text-[0.84rem] font-medium text-[var(--ink-soft)] bg-transparent border border-[var(--rule)] rounded px-3 py-2 cursor-pointer hover:text-[var(--forest)] hover:border-[var(--forest)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--forest)] focus-visible:outline-offset-2">Now</button>
-      <label for="cpdeadline" class="text-[0.85rem] font-semibold text-[var(--ink-soft)]">Deadline</label>
-      <input id="cpdeadline" type="time" value="18:00" class="font-semibold text-base tabular-nums text-[var(--ink)] bg-[var(--paper)] border border-[var(--rule)] rounded px-2 py-1.5">
-    </div>
-    <div class="flex flex-wrap items-center gap-2 mt-4">
-      <label for="cppace" class="text-[0.85rem] font-semibold text-[var(--ink-soft)]">Pace</label>
-      <select id="cppace" class="font-semibold text-[0.95rem] text-[var(--ink)] bg-[var(--paper)] border border-[var(--rule)] rounded px-2 py-1.5">
-        <option value="0.85">Quick</option>
-        <option value="1" selected>Normal</option>
-        <option value="1.2">Slow</option>
-      </select>
-      <span class="text-[0.82rem] text-[var(--ink-soft)]" id="pacehint">Set to how the morning actually went.</span>
-      <button type="button" id="cpreset" class="ml-auto text-[0.84rem] font-medium text-[var(--ink-soft)] bg-transparent border border-[var(--rule)] rounded px-3 py-2 cursor-pointer hover:text-[var(--forest)] hover:border-[var(--forest)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--forest)] focus-visible:outline-offset-2">Start over</button>
-    </div>
-    <div id="cpstops" class="mt-4 flex flex-col gap-0.5"></div>
-    <div id="cpout" class="mt-4 border-t border-[var(--rule)] pt-4"><p class="m-0 text-[0.93rem] text-[var(--ink-soft)]">Pick a checkpoint above.</p></div>
-  </div>
-
-  <p class="my-3">Or plan it in advance from the tables below.</p>
-
-  <h3 class="font-display font-semibold text-base mt-8 mb-1">Day 1, going up</h3>
-  <div class="overflow-x-auto">
-  <table class="border-collapse w-full min-w-[30rem] my-4 text-[0.93rem]">
-    <thead><tr>
-      <th class="text-left font-display font-semibold text-[0.85rem] text-[var(--ink-soft)] pr-3 pb-2 border-b border-[var(--rule)]">Stop</th>
-      <th class="text-left font-display font-semibold text-[0.85rem] text-[var(--ink-soft)] pr-3 pb-2 border-b border-[var(--rule)]">Decide at</th>
-      <th class="text-left font-display font-semibold text-[0.85rem] text-[var(--ink-soft)] pr-3 pb-2 border-b border-[var(--rule)]">Costs</th>
-      <th class="text-left font-display font-semibold text-[0.85rem] text-[var(--ink-soft)] pr-3 pb-2 border-b border-[var(--rule)]">Summit at</th>
-    </tr></thead>
-    <tbody>
-      <tr><td class="font-semibold border-b border-[var(--rule)] py-2 pr-3">Galikonda viewpoint</td><td class="border-b border-[var(--rule)] py-2 pr-3">On the Anantagiri ghat, ~6:45</td><td class="border-b border-[var(--rule)] py-2 pr-3 tabular-nums whitespace-nowrap">10 min</td><td class="border-b border-[var(--rule)] py-2 pr-3 tabular-nums whitespace-nowrap">14:40</td></tr>
-      <tr><td class="font-semibold border-b border-[var(--rule)] py-2 pr-3">Maliguda tunnel</td><td class="border-b border-[var(--rule)] py-2 pr-3">Semiliguda</td><td class="border-b border-[var(--rule)] py-2 pr-3 tabular-nums whitespace-nowrap">20 min</td><td class="border-b border-[var(--rule)] py-2 pr-3 tabular-nums whitespace-nowrap">14:50</td></tr>
-      <tr><td class="font-semibold border-b border-[var(--rule)] py-2 pr-3">Galigabadar falls</td><td class="border-b border-[var(--rule)] py-2 pr-3">Pottangi</td><td class="border-b border-[var(--rule)] py-2 pr-3 tabular-nums whitespace-nowrap">90 min</td><td class="border-b border-[var(--rule)] py-2 pr-3 tabular-nums whitespace-nowrap">16:00</td></tr>
-      <tr><td class="font-semibold border-b border-[var(--rule)] py-2 pr-3">Both of the above</td><td class="border-b border-[var(--rule)] py-2 pr-3">Semiliguda</td><td class="border-b border-[var(--rule)] py-2 pr-3 tabular-nums whitespace-nowrap">110 min</td><td class="border-b border-[var(--rule)] py-2 pr-3 tabular-nums whitespace-nowrap">16:20</td></tr>
-      <tr class="text-[var(--ink-soft)]"><td class="font-semibold border-b border-[var(--rule)] py-2 pr-3 line-through decoration-[var(--rule)]">Rani Duduma</td><td class="border-b border-[var(--rule)] py-2 pr-3 line-through decoration-[var(--rule)]">Semiliguda</td><td class="border-b border-[var(--rule)] py-2 pr-3 tabular-nums whitespace-nowrap line-through decoration-[var(--rule)]">3 hrs</td><td class="border-b border-[var(--rule)] py-2 pr-3 tabular-nums whitespace-nowrap text-[var(--laterite)]">17:30 — too late</td></tr>
-    </tbody>
-  </table>
-  </div>
-  <p class="text-sm text-[var(--ink-soft)] mt-2">Day 1 walking is Balda's last 2 km up and back for the pillions, plus the watchtower path. Riders who take the bikes up Balda walk closer to 2 km than 7. Galikonda is free and you ride past it. Borra doesn't work going up — you'll pass around 7:00 and it opens later.</p>
-
-  <div class="border-l-[3px] border-[var(--laterite)] bg-[var(--shade)] p-3.5 my-6 rounded-r">
-    <p class="m-0 text-[0.95rem]"><strong class="text-[var(--laterite)]">One cut-off governs all of these.</strong> Be turning onto the Doodhari road by 15:30. The climb takes about 75 minutes and you want to be parked well before the light goes. Past 15:30, skip whatever you were considering and ride up.</p>
-  </div>
-
   <h3 class="font-display font-semibold text-base mt-8 mb-1">Day 2, coming home</h3>
   <p class="my-3">No arrival deadline today, so stops are cheap. The only thing to protect is clearing the Sunki descent in good light — easy if you're through Pottangi by early afternoon.</p>
   <div class="overflow-x-auto">
@@ -242,24 +285,6 @@
   </div>
   <p class="text-sm text-[var(--ink-soft)] mt-2">Pick one, maybe two. Time costs are rough — hill roads and a loaded bike both run slow.</p>
 
-  <h2 class="font-display font-semibold text-xl tracking-[-0.012em] mt-12 mb-1 pb-2 border-b border-[var(--rule)]">Non-negotiables</h2>
-  <div class="border-l-[3px] border-[var(--laterite)] bg-[var(--shade)] p-3.5 my-6 rounded-r">
-    <p class="m-0 text-[0.95rem]"><strong class="text-[var(--laterite)]">Through the Deomali gate before 18:00.</strong> The district administration bars night entry. Late means turned away, and your booking doesn't help you.</p>
-    <p class="mt-1 text-[0.95rem]"><strong class="text-[var(--laterite)]">Off the ghats before dark.</strong> Free-roaming cattle, no lighting, blind hairpins, trucks. Locals don't ride these roads at night.</p>
-    <p class="mt-1 text-[0.95rem]"><strong class="text-[var(--laterite)]">Don't swim in Balda Pond.</strong> It looks shallow and isn't. People have drowned there.</p>
-    <p class="mt-1 text-[0.95rem]"><strong class="text-[var(--laterite)]">Bail-out rule.</strong> Not at Balda by 11:00? Skip it and ride for Deomali. The booked night matters more.</p>
-  </div>
-
-  <h2 class="font-display font-semibold text-xl tracking-[-0.012em] mt-12 mb-1 pb-2 border-b border-[var(--rule)]">Balda</h2>
-  <p class="my-3">Balda village, via Padwa, Nandapur block, Koraput. Flat tabletop summit with a pond, views over Jalaput reservoir, and trains crossing the valley below. The cave itself is small — the plateau is the reason to go.</p>
-  <div class="overflow-x-auto">
-  <table class="border-collapse w-full my-4 text-[0.95rem]">
-    <tr><td class="border-b border-[var(--rule)] py-2.5 pr-4 align-top font-semibold w-44">Cave hours</td><td class="border-b border-[var(--rule)] py-2.5 pr-2 align-top">8:00–18:00 weekdays, 9:00–17:00 weekends</td></tr>
-    <tr><td class="border-b border-[var(--rule)] py-2.5 pr-4 align-top font-semibold w-44">Phone</td><td class="border-b border-[var(--rule)] py-2.5 pr-2 align-top">+91 88953 78142</td></tr>
-    <tr><td class="border-b border-[var(--rule)] py-2.5 pr-4 align-top font-semibold w-44">Last 2 km</td><td class="border-b border-[var(--rule)] py-2.5 pr-2 align-top">No proper road. Steep, off-road. Single rider can make it up; two-up with luggage, park lower and walk.</td></tr>
-  </table>
-  </div>
-
   <h2 class="font-display font-semibold text-xl tracking-[-0.012em] mt-12 mb-1 pb-2 border-b border-[var(--rule)]">Deomali</h2>
   <p class="my-3">The camps sit on the flat plateau just below the summit, with vehicle access right up to the parking zone beside the camping ground — you ride to your tent and carry nothing. The summit itself is a separate 15 to 30 minute walk from there on a clear paved path, up to the watchtower. The plateau runs about 5 km across.</p>
   <div class="overflow-x-auto">
@@ -278,6 +303,16 @@
   </table>
   </div>
 
+  </div>
+
+  <div class="tabpanel" id="tab-map" role="tabpanel" aria-labelledby="tab-btn-map" hidden>
+  <h2 class="font-display font-semibold text-xl tracking-[-0.012em] mt-12 mb-1 pb-2 border-b border-[var(--rule)]">Photos by place</h2>
+  <p class="my-3">Click a pin to see photos from that stop. Empty until photos are added — route data lives in <code class="text-sm">data/deomali-places.json</code>.</p>
+  <div id="tripmap" class="h-[420px] rounded border border-[var(--rule)] mt-4"></div>
+
+  </div>
+
+  <div class="tabpanel" id="tab-budget" role="tabpanel" aria-labelledby="tab-btn-budget" hidden>
   <h2 class="font-display font-semibold text-xl tracking-[-0.012em] mt-12 mb-1 pb-2 border-b border-[var(--rule)]">Fuel</h2>
   <p class="my-3">Araku, then Semiliguda. Fill completely at Semiliguda before the climb — nothing above that point, and nothing on the Balda track either.</p>
 
@@ -412,6 +447,9 @@
     <li class="my-1.5"><strong>Water is per head.</strong> Six people and no source on the summit — that's a lot of bottles to carry up from the parking point.</li>
   </ul>
 
+  </div>
+
+  <div class="tabpanel" id="tab-carry" role="tabpanel" aria-labelledby="tab-btn-carry" hidden>
   <h2 class="font-display font-semibold text-xl tracking-[-0.012em] mt-12 mb-1 pb-2 border-b border-[var(--rule)]">Food</h2>
   <div class="border-l-[3px] border-[var(--laterite)] bg-[var(--shade)] p-3.5 my-6 rounded-r">
     <p class="m-0 text-[0.95rem]"><strong class="text-[var(--laterite)]">No raw chicken from Vizag.</strong> Sixteen hours unrefrigerated on a bike in September is the exact route to the bathroom situation you're avoiding — on a mountain with no toilets. Buy it at Semiliguda instead.</p>
@@ -525,6 +563,9 @@
 
   <p class="my-3">At 1,672 m you don't need anything for altitude — that's a hill, not thin air. Cold is the thing that will actually bother you.</p>
 
+  </div>
+
+  <div class="tabpanel" id="tab-extras" role="tabpanel" aria-labelledby="tab-btn-extras" hidden>
   <h2 class="font-display font-semibold text-xl tracking-[-0.012em] mt-12 mb-1 pb-2 border-b border-[var(--rule)]">Parked ideas</h2>
   <details class="border-b border-[var(--rule)] py-2.5">
     <summary class="cursor-pointer font-semibold text-[0.97rem] flex justify-between gap-4 items-baseline">Galigabadar falls</summary>
@@ -573,15 +614,13 @@
     <li class="my-1.5">Medkit packed, and everyone's own medicines in it</li>
   </ul>
 
-  <h2 class="font-display font-semibold text-xl tracking-[-0.012em] mt-12 mb-1 pb-2 border-b border-[var(--rule)]">Photos by place</h2>
-  <p class="my-3">Click a pin to see photos from that stop. Empty until photos are added — route data lives in <code class="text-sm">data/deomali-places.json</code>.</p>
-  <div id="tripmap" class="h-[420px] rounded border border-[var(--rule)] mt-4"></div>
-
   <h2 class="font-display font-semibold text-xl tracking-[-0.012em] mt-12 mb-1 pb-2 border-b border-[var(--rule)]">Your notes</h2>
   <div class="border border-dashed border-[var(--rule)] rounded p-4 text-[var(--ink-soft)] text-[0.95rem] mt-4">
     <p class="my-1.5">Riders and bikes —</p>
     <p class="my-1.5">Dates —</p>
     <p class="my-1.5">Anything else to add —</p>
+  </div>
+
   </div>
 
 <script>
@@ -920,6 +959,37 @@
 })();
 </script>
 
+
+<script>
+(function(){
+  var nav=document.getElementById('tabnav');
+  if(!nav) return;
+  var btns=Array.prototype.slice.call(nav.querySelectorAll('[role="tab"]'));
+  var panels={};
+  btns.forEach(function(b){ panels[b.dataset.tab]=document.getElementById('tab-'+b.dataset.tab); });
+
+  function show(name){
+    btns.forEach(function(b){
+      var on=b.dataset.tab===name;
+      b.setAttribute('aria-selected',on?'true':'false');
+      b.tabIndex=on?0:-1;
+      panels[b.dataset.tab].hidden=!on;
+    });
+    try{ localStorage.setItem('deomali-tab',name); }catch(e){}
+  }
+
+  btns.forEach(function(b){
+    b.addEventListener('click',function(){ show(b.dataset.tab); });
+  });
+
+  var start='day1';
+  try{
+    var saved=localStorage.getItem('deomali-tab');
+    if(saved && panels[saved]) start=saved;
+  }catch(e){}
+  show(start);
+})();
+</script>
 <script>
 (function(){
   var mapEl=document.getElementById('tripmap');
