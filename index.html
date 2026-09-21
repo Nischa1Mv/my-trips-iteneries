@@ -38,10 +38,10 @@
     font-size:16.5px;
     line-height:1.62;
   }
-  .wrap{max-width:64rem;margin:0 auto;padding:.6rem .2rem 5rem}
+  .wrap{max-width:64rem;margin:0 auto;padding:0 1.25rem 5rem}
 
   /* hero carousel */
-  .hero{position:relative;overflow:hidden;width:100%;aspect-ratio:16/9;max-height:560px;min-height:320px;border-radius:1.4rem;color:#F4EFE6}
+  .hero{position:relative;overflow:hidden;width:100%;height:100svh;color:#F4EFE6}
 
   .hero-track{display:flex;height:100%;transition:transform .6s cubic-bezier(.65,0,.35,1)}
   .hero-slide{position:relative;height:100%;flex:none}
@@ -122,19 +122,19 @@
 </style>
 </head>
 <body>
+  <div class="hero" id="hero">
+    <nav class="hero-nav">
+      <span class="brand">Trip notes</span>
+      <div class="hero-dots" id="heroDots"></div>
+    </nav>
+
+    <button type="button" class="hero-arrow prev" id="heroPrev" aria-label="Previous trip">‹</button>
+    <button type="button" class="hero-arrow next" id="heroNext" aria-label="Next trip">›</button>
+
+    <div class="hero-track" id="heroTrack"></div>
+  </div>
+
   <div class="wrap">
-    <div class="hero" id="hero">
-      <nav class="hero-nav">
-        <span class="brand">Trip notes</span>
-        <div class="hero-dots" id="heroDots"></div>
-      </nav>
-
-      <button type="button" class="hero-arrow prev" id="heroPrev" aria-label="Previous trip">‹</button>
-      <button type="button" class="hero-arrow next" id="heroNext" aria-label="Next trip">›</button>
-
-      <div class="hero-track" id="heroTrack"></div>
-    </div>
-
     <h1 class="page-title">All itineraries</h1>
     <p class="lede">Every trip written up so far. Swipe the hero above or use the dots.</p>
   </div>
